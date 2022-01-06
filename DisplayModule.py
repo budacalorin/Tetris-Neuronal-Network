@@ -26,7 +26,6 @@ class Padding:
 
 
 class DisplayManager:
-
     PIECE_SIZE = Size(20, 20)
     MATRIX_SEPARATORS_IN_PIXELS = 1
     TABLE_PADDING_IN_PIXELS = Padding(15, 15, 30, 5)
@@ -53,8 +52,10 @@ class DisplayManager:
 
     def getDisplaySize(self) -> Size:
         return Size(
-            width=self.TABLE_PADDING_IN_PIXELS.left + self.TABLE_PADDING_IN_PIXELS.right + self.NUMBER_OF_COLUMNS * (self.PIECE_SIZE.width + self.MATRIX_SEPARATORS_IN_PIXELS) - self.MATRIX_SEPARATORS_IN_PIXELS,
-            height=self.TABLE_PADDING_IN_PIXELS.up + self.TABLE_PADDING_IN_PIXELS.down + self.NUMBER_OF_ROWS * (self.PIECE_SIZE.height + self.MATRIX_SEPARATORS_IN_PIXELS) - self.MATRIX_SEPARATORS_IN_PIXELS
+            width=self.TABLE_PADDING_IN_PIXELS.left + self.TABLE_PADDING_IN_PIXELS.right + self.NUMBER_OF_COLUMNS * (
+                        self.PIECE_SIZE.width + self.MATRIX_SEPARATORS_IN_PIXELS) - self.MATRIX_SEPARATORS_IN_PIXELS,
+            height=self.TABLE_PADDING_IN_PIXELS.up + self.TABLE_PADDING_IN_PIXELS.down + self.NUMBER_OF_ROWS * (
+                        self.PIECE_SIZE.height + self.MATRIX_SEPARATORS_IN_PIXELS) - self.MATRIX_SEPARATORS_IN_PIXELS
         )
 
     def getColor(self, forColorIndex: int) -> pygame.Color:
@@ -97,3 +98,9 @@ class DisplayManager:
 
         pygame.display.update()
 
+    def isWindowClosed(self) -> bool:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
+
+        return False

@@ -1,8 +1,16 @@
+import random
+
+
 class Table:
     pixels: list
 
     def __init__(self, pixels):
         self.pixels = pixels
+
+    def clone(self):
+        return Table(
+            pixels= [x[:] for x in self.pixels]
+        )
 
     def getMaxHeights(self):
         numberOfLines = len(self.pixels)
@@ -63,6 +71,11 @@ class State:
             totalHeight=self.table.totalHeight()
         )
 
+    def clone(self):
+        return State(
+            table=self.table.clone()
+        )
+
 
 class BoardProperties:
 
@@ -76,3 +89,76 @@ class BoardProperties:
         self.fullLines = fullLines
         self.bumpiness = bumpiness
         self.totalHeight = totalHeight
+
+
+class TetrisPiece:
+
+    possiblePositions: list
+
+    def __init__(self, allPositions: list):
+        self.possiblePositions = allPositions
+
+
+class TetrisHelper:
+
+    pieces: list
+    currentState: State
+    score: int
+
+    def __init__(self, pieces: list):
+        self.pieces = pieces
+        self.restart()
+
+    def restart(self):
+        self.currentState = self.getInitialPosition()
+        self.score = 0
+
+    def getInitialPosition(self) -> State:
+        return State(Table(
+            [[0 for _ in range(10)] for _ in range(15)]
+        ))
+
+    def simulateDrop(self, piecePosition: list, column) -> State:
+        lowest = -1
+        found = False
+
+        while lowest < 15 and not found:
+            lowest += 1
+            found = self.collision(column, lowest, piecePosition)
+
+        if lowest == 0:
+            print("Could not place piece")
+            return self.currentState.clone()
+        lowest -= 1
+
+        clone = self.currentState.clone()
+        self.placePiece(clone, column, lowest, piecePosition)
+
+        return clone
+
+    def placePiece(self, state: State, column: int, lowest: int, piecePosition: list):
+        color = random.randint(0, 7) + 1
+        for piecePosition in piecePosition:
+            x = lowest + piecePosition[0]
+            y = column + piecePosition[1]
+            state.table.pixels[x][y] = color
+
+    def collision(self, column: int, line: int, piecePositions: list) -> bool:
+        for piecePosition in piecePositions:
+            x = line + piecePosition[0]
+            y = column + piecePosition[1]
+            if x >= 15 or y >= 10:
+                return True
+            if self.currentState.table.pixels[x][y] != 0:
+                return True
+
+        return False
+
+    def possibleStates(self, piece: TetrisPiece) -> list:
+        states = []
+        for column in range(10):
+            for piecePosition in piece.possiblePositions:
+                if not self.collision(column, 0, piecePosition):
+                    states.append(self.simulateDrop(piecePosition, column))
+
+        return states

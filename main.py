@@ -1,6 +1,6 @@
-import pygame
 import DisplayModule as dm
 import GameModule as gm
+import time
 
 
 if __name__ == '__main__':
@@ -26,11 +26,60 @@ if __name__ == '__main__':
     )
     displayManager.displayState(state)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+    tetris = gm.TetrisHelper([
+        # I
+        gm.TetrisPiece([
+            [(0, 0), (1, 0), (2, 0), (3, 0)],
+            [(0, 0), (0, 1), (0, 2), (0, 3)]
+        ]),
+        # L
+        gm.TetrisPiece([
+            [(0, 0), (1, 0), (1, 1), (1, 2)],
+            [(0, 1), (1, 1), (2, 1), (2, 0)],
+            [(0, 0), (0, 1), (0, 2), (1, 2)],
+            [(0, 0), (0, 1), (1, 0), (2, 0)]
+        ]),
+        # Back L
+        gm.TetrisPiece([
+            [(0, 0), (1, 0), (2, 0), (2, 1)],
+            [(1, 0), (1, 1), (1, 2), (0, 2)],
+            [(0, 0), (1, 0), (0, 1), (0, 2)],
+            [(0, 0), (0, 1), (1, 1), (2, 1)]
+        ]),
+        # Square
+        gm.TetrisPiece([
+            [(0, 0), (0, 1), (1, 0), (1, 1)],
+        ]),
+        # Left Chair
+        gm.TetrisPiece([
+            [(1, 0), (1, 1), (0, 1), (0, 2)],
+            [(0, 0), (1, 0), (1, 1), (2, 1)]
+        ]),
+        # T
+        gm.TetrisPiece([
+            [(0, 0), (0, 1), (0, 2), (1, 1)],
+            [(1, 0), (1, 1), (0, 1), (2, 1)],
+            [(1, 0), (1, 1), (1, 2), (0, 1)]
+        ]),
+        # Right Chair
+        gm.TetrisPiece([
+            [(0, 0), (0, 1), (1, 1), (1, 2)],
+            [(0, 1), (1, 1), (1, 0), (2, 0)]
+        ])
+    ])
+
+    tetris.currentState = state
+
+
+    while not displayManager.isWindowClosed():
+        print("Printing states")
+        for piece in tetris.pieces:
+            nextStates = tetris.possibleStates(piece)
+            for state in nextStates:
+                displayManager.displayState(state)
+                time.sleep(0.2)
+
+
 
 
 
