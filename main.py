@@ -1,11 +1,13 @@
-import DisplayModule as dm
 import GameModule as gm
 import Deep_Learning_Agent as dqa
 import time
-
+displaying = False
+if displaying:
+    import DisplayModule as dm
 
 if __name__ == '__main__':
-    displayManager = dm.DisplayManager()
+    if displaying:
+        displayManager = dm.DisplayManager()
     state = gm.State(
         gm.Table([
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -25,7 +27,9 @@ if __name__ == '__main__':
             [6, 7, 7, 1, 4, 3, 2, 2, 1, 10]
         ])
     )
-    displayManager.displayState(state)
+
+    if displaying:
+        displayManager.displayState(state)
 
     tetris = gm.TetrisHelper([
         # I
@@ -100,7 +104,8 @@ if __name__ == '__main__':
         states = []
 
         while not done and (not maxSteps or steps < maxSteps):
-            displayManager.isWindowClosed()
+            if displaying:
+                displayManager.isWindowClosed()
 
             nextStatesProperties = list(map(lambda s: s.getStateProperties(), nextStates))
 
@@ -110,7 +115,6 @@ if __name__ == '__main__':
             best_state_properties = nextStatesProperties[best_state_index]
 
             states.append(best_state)
-            # displayManager.displayState(best_state)
 
             old_state = tetris.currentState
 
@@ -131,7 +135,7 @@ if __name__ == '__main__':
         if episode % trainEvery == 0:
             agent.train(batch_size=batchSize, epochs=epochs)
 
-        if episode % renderEvery == 0:
+        if displaying and episode % renderEvery == 0:
             for state in states:
                 displayManager.displayState(state)
                 time.sleep(0.03)

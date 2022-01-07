@@ -184,7 +184,7 @@ class TetrisHelper:
         while len(extractedTable.pixels) != 15:
             extractedTable.pixels.insert(0, [0 for _ in range(10)])
 
-        return State(extractedTable), fullLines #+ placedPieces
+        return State(extractedTable), 1 + fullLines ^ 2 * 10 #+ placedPieces
 
     def play(self, state: State):
         self.currentState, reward = self.extractReward(state)
