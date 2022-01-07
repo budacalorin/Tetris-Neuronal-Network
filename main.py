@@ -1,11 +1,11 @@
-# import DisplayModule as dm
+import DisplayModule as dm
 import GameModule as gm
 import Deep_Learning_Agent as dqa
 import time
 
 
 if __name__ == '__main__':
-    # displayManager = dm.DisplayManager()
+    displayManager = dm.DisplayManager()
     state = gm.State(
         gm.Table([
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -25,7 +25,7 @@ if __name__ == '__main__':
             [6, 7, 7, 1, 4, 3, 2, 2, 1, 10]
         ])
     )
-    # displayManager.displayState(state)
+    displayManager.displayState(state)
 
     tetris = gm.TetrisHelper([
         # I
@@ -100,7 +100,7 @@ if __name__ == '__main__':
         states = []
 
         while not done and (not maxSteps or steps < maxSteps):
-            # displayManager.isWindowClosed()
+            displayManager.isWindowClosed()
 
             nextStatesProperties = list(map(lambda s: s.getStateProperties(), nextStates))
 
