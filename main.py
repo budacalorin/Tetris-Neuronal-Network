@@ -131,7 +131,7 @@ if __name__ == '__main__':
         if episode % trainEvery == 0:
             agent.train(batch_size=batchSize, epochs=epochs)
 
-        if episode % renderEvery:
+        if episode % renderEvery == 0:
             for state in states:
                 displayManager.displayState(state)
                 time.sleep(0.03)
