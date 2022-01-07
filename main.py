@@ -8,6 +8,7 @@ if displaying:
 if __name__ == '__main__':
     if displaying:
         displayManager = dm.DisplayManager()
+
     state = gm.State(
         gm.Table([
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -91,6 +92,9 @@ if __name__ == '__main__':
 
     agent = dqa.DeepLearningAgent(4, "model_agent.h5")
 
+    bestGame = []
+    maxScore = 0
+
     for episode in range(episodes):
         tetris.restart()
         currentState = tetris.currentState
@@ -132,6 +136,10 @@ if __name__ == '__main__':
         print(f"Finished with score {tetris.score}")
         # print(tetris.currentState.table.pixels)
 
+        if tetris.score > maxScore:
+            maxScore = tetris.score
+            bestGame = states
+
         # Train
         if episode % trainEvery == 0:
             agent.train(batch_size=batchSize, epochs=epochs)
@@ -139,8 +147,9 @@ if __name__ == '__main__':
         if episode % saveEvery == 0:
             agent.model.save("model_agent.h5")
 
-
-        if displaying and episode % renderEvery == 0:
-            for state in states:
+        if episode % renderEvery == 0:
+            print(maxScore)
+            maxScore = 0
+            for state in bestGame:
                 displayManager.displayState(state)
                 time.sleep(0.1)
