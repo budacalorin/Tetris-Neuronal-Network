@@ -5,7 +5,8 @@ import numpy as np
 import random
 
 
-class Deep_Learning_Agent:
+class DeepLearningAgent:
+
     def __init__(self,
                  size_input_domain,
                  replay_buffer_size=10000,
@@ -43,7 +44,7 @@ class Deep_Learning_Agent:
         :return: learning-model
         """
         learning_model = Sequential()
-        learning_model.add(Dense(self.size_hidden_layers[0], input_dim=self.state_size, activation=self.activations[0]))
+        learning_model.add(Dense(self.size_hidden_layers[0], input_dim=self.size_input_domain, activation=self.activations[0]))
 
         for i in range(1, len(self.size_hidden_layers)):
             learning_model.add(Dense(self.size_hidden_layers[i], activation=self.activations[i]))
@@ -62,6 +63,8 @@ class Deep_Learning_Agent:
         :param done: if the game is finished or not
         :return:
         """
+        current_state = self.extract_input_from_state(current_state)
+        next_state = self.extract_input_from_state(next_state)
         self.memory.append((current_state, next_state, reward, done))
 
     def random_value(self):
@@ -82,30 +85,39 @@ class Deep_Learning_Agent:
         :param state: the state of the game
         :return: the predicted score for the taken action
         """
-        state = np.reshape(state, [1, self.state_size])
+        state = np.reshape(state, [1, self.size_input_domain])
         if random.random() <= self.epsilon:
             return self.random_value()
         else:
             return self.predict_value(state)
 
+    def extract_input_from_states(self, states):
+        return list(map(lambda state: self.extract_input_from_state(state), states))
+
+    def extract_input_from_state(self, state):
+        return [state.fullLines, state.holes, state.bumpiness, state.totalHeight]
+
     def best_state(self, states):
         """
-        Evaluates the states and returns the best state from the batch using epsilon-greedy policy
+        Evaluates the states and returns the index of the best state from the batch using epsilon-greedy policy
         :param states: the batch with states of the game
-        :return: the best action the game can take
+        :return: the index of the best action the game can take
         """
+        states = self.extract_input_from_states(states)
+
         max_value = None
-        best_state = None
+        best_state_index = None
 
         if random.random() <= self.epsilon:
-            return random.choice(list(states))
+            return random.randint(0, len(states) - 1)
         else:
-            for state in states:
-                value = self.predict_value(np.reshape(state, [1, self.state_size]))
+            for state_index in range(len(states)):
+                state = states[state_index]
+                value = self.predict_value(np.reshape(state, [1, self.size_input_domain]))
                 if not max_value or value > max_value:
                     max_value = value
-                    best_state = state
-        return best_state
+                    best_state_index = state_index
+        return best_state_index
 
     def train(self, batch_size=32, epochs=3):
         """

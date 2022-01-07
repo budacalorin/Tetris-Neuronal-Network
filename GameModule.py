@@ -64,7 +64,7 @@ class State:
         self.table = table
 
     def getStateProperties(self):
-        return BoardProperties(
+        return StateProperties(
             holes=self.table.getNumberOfHoles(),
             fullLines=self.table.fullLines(),
             bumpiness=self.table.bumpiness(),
@@ -77,7 +77,7 @@ class State:
         )
 
 
-class BoardProperties:
+class StateProperties:
 
     holes: int
     fullLines: int
@@ -137,7 +137,7 @@ class TetrisHelper:
         return clone
 
     def placePiece(self, state: State, column: int, lowest: int, piecePosition: list):
-        color = random.randint(0, 7) + 1
+        color = random.randint(0, 6) + 1
         for piecePosition in piecePosition:
             x = lowest + piecePosition[0]
             y = column + piecePosition[1]
@@ -162,3 +162,33 @@ class TetrisHelper:
                     states.append(self.simulateDrop(piecePosition, column))
 
         return states
+
+    def getNextStates(self) -> list:
+        nextPiece = random.randint(0, len(self.pieces) - 1)
+        return self.possibleStates(self.pieces[nextPiece])
+
+    def extractReward(self, state) -> (State, int):
+        extractedTable = Table([])
+        fullLines = 0
+        placedPieces = 0
+
+        for line in state.table.pixels:
+            pixels = sum(map(lambda pixel: pixel != 0, line))
+            placedPieces += pixels
+
+            if pixels != 10:
+                extractedTable.pixels.append(line)
+            else:
+                fullLines += 1
+
+        while len(extractedTable.pixels) != 15:
+            extractedTable.pixels.insert(0, [0 for _ in range(10)])
+
+        return State(extractedTable), fullLines #+ placedPieces
+
+    def play(self, state: State):
+        self.currentState, reward = self.extractReward(state)
+        self.score += reward
+        return reward, False
+
+
