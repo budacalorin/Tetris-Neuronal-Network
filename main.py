@@ -1,7 +1,7 @@
 import GameModule as gm
 import Deep_Learning_Agent as dqa
 import time
-displaying = False
+displaying = True
 if displaying:
     import DisplayModule as dm
 
@@ -78,17 +78,18 @@ if __name__ == '__main__':
     epsilonStopEpisode = 1500
     memSize = 20000
     discount = 0.95
-    batchSize = 512
+    batchSize = 1000
     epochs = 1
-    renderEvery = 200
+    renderEvery = 50
     logEvery = 50
     replayStart_Size = 2000
-    trainEvery = 1
+    trainEvery = 32
     nNeurons = [32, 32]
     renderDelay = None
     activations = ['relu', 'relu', 'linear']
+    saveEvery = 200
 
-    agent = dqa.DeepLearningAgent(4)
+    agent = dqa.DeepLearningAgent(4, "model_agent.h5")
 
     for episode in range(episodes):
         tetris.restart()
@@ -135,7 +136,11 @@ if __name__ == '__main__':
         if episode % trainEvery == 0:
             agent.train(batch_size=batchSize, epochs=epochs)
 
+        if episode % saveEvery == 0:
+            agent.model.save("model_agent.h5")
+
+
         if displaying and episode % renderEvery == 0:
             for state in states:
                 displayManager.displayState(state)
-                time.sleep(0.03)
+                time.sleep(0.1)

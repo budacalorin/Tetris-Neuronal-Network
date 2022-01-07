@@ -1,31 +1,35 @@
+import keras.models
 from keras.models import Sequential
 from keras.layers import Dense
 from collections import deque
 import numpy as np
 import random
+import os
 
 
 class DeepLearningAgent:
 
     def __init__(self,
                  size_input_domain,
+                 model_file_path,
                  replay_buffer_size=10000,
                  discount=0.95,
                  epsilon=1,
+                 episodes_per_training=32,
                  epsilon_min=0,
-                 epsilon_stop_episode=500,
+                 epsilon_stop_training=400,
                  size_hidden_layers=[32, 32],
                  activations=['relu', 'relu', 'linear'],
                  loss='mse',
                  optimizer='adam',
                  replay_buffer_start_size=None):
-
+        self.path = model_file_path
         self.size_input_domain = size_input_domain
         self.memory = deque(maxlen=replay_buffer_size)
         self.discount = discount
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
-        self.epsilon_decay = (self.epsilon - self.epsilon_min) / epsilon_stop_episode
+        self.epsilon_decay = (self.epsilon - self.epsilon_min) / (epsilon_stop_training / episodes_per_training)
         self.size_hidden_layers = size_hidden_layers
         self.activations = activations
         self.loss = loss
@@ -43,15 +47,18 @@ class DeepLearningAgent:
         Output Layer: [32 x 1]
         :return: learning-model
         """
-        learning_model = Sequential()
-        learning_model.add(Dense(self.size_hidden_layers[0], input_dim=self.size_input_domain, activation=self.activations[0]))
+        if os.path.isfile(self.path):
+            learning_model = keras.models.load_model(self.path)
+        else:
+            learning_model = Sequential()
+            learning_model.add(Dense(self.size_hidden_layers[0], input_dim=self.size_input_domain, activation=self.activations[0]))
 
-        for i in range(1, len(self.size_hidden_layers)):
-            learning_model.add(Dense(self.size_hidden_layers[i], activation=self.activations[i]))
+            for i in range(1, len(self.size_hidden_layers)):
+                learning_model.add(Dense(self.size_hidden_layers[i], activation=self.activations[i]))
 
-        learning_model.add(Dense(1, activation=self.activations[-1]))
+            learning_model.add(Dense(1, activation=self.activations[-1]))
 
-        learning_model.compile(loss=self.loss, optimizer=self.optimizer)
+            learning_model.compile(loss=self.loss, optimizer=self.optimizer)
 
         return learning_model
 
@@ -119,7 +126,7 @@ class DeepLearningAgent:
                     best_state_index = state_index
         return best_state_index
 
-    def train(self, batch_size=32, epochs=3):
+    def train(self, batch_size=32, epochs=1):
         """
         Training the model; if we have in memory enough states - for the replay buffer and for the
         mini-batch size, we select a mini-batch at random, take the states from it, predict the scores using the model,
